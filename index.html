@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Admirál Jiřík - Hlavní Můstek</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes starfield {
+            from { transform: translateY(0); }
+            to { transform: translateY(-100%); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(34, 211, 238, 1); }
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #22d3ee;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 200%;
+            background: 
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, white, transparent),
+                radial-gradient(1px 1px at 50% 50%, white, transparent),
+                radial-gradient(1px 1px at 80% 10%, white, transparent),
+                radial-gradient(2px 2px at 90% 60%, white, transparent),
+                radial-gradient(1px 1px at 33% 80%, white, transparent),
+                radial-gradient(2px 2px at 10% 90%, white, transparent);
+            background-size: 200% 200%;
+            animation: starfield 120s linear infinite;
+            z-index: 0;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s, visibility 1s;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .starfleet-logo {
+            font-size: 6em;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        .loading-text {
+            color: #22d3ee;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 8px;
+            background: #1e3a8a;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #22d3ee, #3b82f6, #9333ea);
+            animation: loading 3s ease-in-out forwards;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .lcars-header {
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            gap: 10px;
+            margin-bottom: 30px;
+            animation: slideIn 1s ease-out;
+        }
+
+        .lcars-cap-left {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            border-radius: 0 50px 50px 0;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lcars-cap-left:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
+        }
+
+        .lcars-title {
+            background: linear-gradient(135deg, #9333ea, #3b82f6);
+            border-radius: 20px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: glow 3s infinite;
+        }
+
+        .lcars-title h1 {
+            color: #fbbf24;
+            font-size: 2em;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .lcars-title .subtitle {
+            color: #22d3ee;
+            font-size: 0.8em;
+        }
+
+        .lcars-cap-right {
+            background: linear-gradient(135deg, #22d3ee, #06b6d4);
+            border-radius: 50px 0 0 50px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            background: #10b981;
+            border-radius: 50%;
+            margin-bottom: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Stránky */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Navigace zpět */
+        .back-nav {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-size: 1em;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
+        }
+
+        /* Homepage */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            margin-bottom: 40px;
+        }
+
+        .hero-title {
+            font-size: 3em;
+            color: #fbbf24;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #fbbf24;
+        }
+
+        .hero-quote {
+            font-size: 1.3em;
+            color: #22d3ee;
+            font-style: italic;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(59, 130, 246, 0.3));
+            border: 2px solid #3b82f6;
+            border-radius: 15px;
+            padding: 20px 30px;
+            min-width: 150px;
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            transform: scale(1.1);
+            border-color: #fbbf24;
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #22d3ee;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .nav-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .nav-card {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.6), rgba(14, 116, 144, 0.6));
+            border: 3px solid #22d3ee;
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-10px);
+            border-color: #fbbf24;
+            box-shadow: 0 10px 40px rgba(251, 191, 36, 0.3);
+        }
+
+        .nav-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .nav-title {
+            color: #fbbf24;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .nav-count {
+            color: #22d3ee;
+            font-size: 0.9em;
+        }
+
+        /* Detail projektu */
+        .project-detail {
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.4), rgba(30, 58, 138, 0.4));
+            border: 3px solid #3b82f6;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .project-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .project-header h2 {
+            color: #fbbf24;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px #fbbf24;
+        }
+
+        .project-header .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .project-image-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 40px;
+            border: 3px solid #22d3ee;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 50px rgba(34, 211, 238, 0.3);
+        }
+
+        .project-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .project-description {
+            color: #bae6fd;
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .project-tags {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .tag {
+            background: rgba(34, 211, 238, 0.2);
+            border: 2px solid #22d3ee;
+            color: #22d3ee;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .project-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .launch-btn {
+            background: linear-gradient(135deg, #22d3ee, #06b6d4);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-size: 1.2em;
+        }
+
+        .launch-btn:hover {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(251, 191, 36, 0.6);
+        }
+
+        .lcars-footer {
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            gap: 10px;
+            margin-top: 50px;
+        }
+
+        .footer-cap-left {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 0 50px 50px 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .footer-bar {
+            background: linear-gradient(90deg, #f59e0b, #ef4444, #ec4899);
+            border-radius: 30px;
+            height: 60px;
+        }
+
+        .footer-cap-right {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            border-radius: 50px 0 0 50px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 30px;
+            padding-bottom: 30px;
+        }
+
+        .footer-text p {
+            color: #22d3ee;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 1024px) {
+            .lcars-header {
+                grid-template-columns: 150px 1fr 150px;
+            }
+            .hero-title {
+                font-size: 2em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .lcars-header {
+                grid-template-columns: 1fr;
+            }
+            .lcars-cap-left, .lcars-cap-right {
+                border-radius: 20px;
+            }
+            .hero-title {
+                font-size: 1.5em;
+            }
+            .lcars-footer {
+                grid-template-columns: 1fr;
+            }
+            .footer-cap-left, .footer-cap-right {
+                border-radius: 20px;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e3a8a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #22d3ee;
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fbbf24;
+        }
+    </style>
+</head>
+<body>
+    <div class="starfield"></div>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="starfleet-logo">🖖</div>
+        <div class="loading-text">INICIALIZACE SYSTÉMU LCARS...</div>
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="lcars-header">
+            <div class="lcars-cap-left" onclick="goToHome()">DOMŮ</div>
+            <div class="lcars-title">
+                <h1>🚀 ADMIRÁL JIŘÍK</h1>
+                <div class="subtitle">HLAVNÍ ADMIRÁLSKÝ MŮSTEK</div>
+            </div>
+            <div class="lcars-cap-right">
+                <div class="status-indicator"></div>
+                <div>ONLINE</div>
+            </div>
+        </div>
+
+        <!-- HOMEPAGE -->
+        <div id="home" class="page active">
+            <div class="hero">
+                <h2 class="hero-title">HVĚZDNÁ FLOTILA POKROČILÝCH TECHNOLOGIÍ</h2>
+                <p class="hero-quote">
+                    "Expanze poznání. Objevování nových technologií.<br>
+                    Odvážně tam, kde ještě nikdo nebyl..."
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-box">
+                        <div class="stat-number">14+</div>
+                        <div class="stat-label">PROJEKTŮ</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">∞</div>
+                        <div class="stat-label">NÁPADŮ</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">9.99</div>
+                        <div class="stat-label">WARP RYCHLOST</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-menu">
+                <div class="nav-card" onclick="goToPage('music-player')">
+                    <div class="nav-icon">🎼</div>
+                    <div class="nav-title">Star Trek Přehrávač</div>
+                    <div class="nav-count">Hudební projekt</div>
+                </div>
+                <div class="nav-card" onclick="goToPage('lyrics-editor')">
+                    <div class="nav-icon">✏️</div>
+                    <div class="nav-title">MP3 Lyrics Editor</div>
+                    <div class="nav-count">Audio nástroj</div>
+                </div>
+                <div class="nav-card" onclick="goToPage('music-genres')">
+                    <div class="nav-icon">🎸</div>
+                    <div class="nav-title">Hudební Žánry</div>
+                    <div class="nav-count">Databáze</div>
+                </div>
+                <div class="nav-card" onclick="goToPage('color-palette')">
+                    <div class="nav-icon">🌈</div>
+                    <div class="nav-title">Paleta Barev</div>
+                    <div class="nav-count">Design nástroj</div>
+                </div>
+                <div class="nav-card" onclick="goToPage('photo-editor')">
+                    <div class="nav-icon">📸</div>
+                    <div class="nav-title">Foto Editor</div>
+                    <div class="nav-count">Grafický nástroj</div>
+                </div>
+                <div class="nav-card" onclick="goToPage('html-editor')">
+                    <div class="nav-icon">📝</div>
+                    <div class="nav-title">HTML Editor</div>
+                    <div class="nav-count">Dev nástroj</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROJEKT: Star Trek Music Player -->
+        <div id="music-player" class="page">
+            <div class="back-nav">
+                <button class="back-btn" onclick="goToHome()">⬅️ ZPĚT NA MŮSTEK</button>
+            </div>
+            <div class="project-detail">
+                <div class="project-header">
+                    <div class="icon">🎼</div>
+                    <h2>STAR TREK HUDEBNÍ PŘEHRÁVAČ</h2>
+                </div>
+                <div class="project-image-container">
+                    <img src="https://via.placeholder.com/900x500/1e3a8a/22d3ee?text=Star+Trek+Music+Player" alt="Star Trek Music Player">
+                </div>
+                <p class="project-description">
+                    Futuristický přehrávač hudby s autentickým LCARS designem a pokročilými vizualizacemi. 
+                    Obsahuje playlist management, audio spektrum a ovládání ve stylu Hvězdné flotily.
+                </p>
+                <div class="project-tags">
+                    <span class="tag">HTML5</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">Web Audio API</span>
+                    <span class="tag">LCARS Design</span>
+                </div>
+                <div class="project-actions">
+                    <button class="launch-btn" onclick="window.open('https://jirka22med.github.io/star-trek-music-player/', '_blank')">
+                        🚀 SPUSTIT PROJEKT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROJEKT: MP3 Lyrics Editor -->
+        <div id="lyrics-editor" class="page">
+            <div class="back-nav">
+                <button class="back-btn" onclick="goToHome()">⬅️ ZPĚT NA MŮSTEK</button>
+            </div>
+            <div class="project-detail">
+                <div class="project-header">
+                    <div class="icon">✏️</div>
+                    <h2>MP3 LYRICS EDITOR</h2>
+                </div>
+                <div class="project-image-container">
+                    <img src="https://via.placeholder.com/900x500/581c87/fbbf24?text=MP3+Lyrics+Editor" alt="MP3 Lyrics Editor">
+                </div>
+                <p class="project-description">
+                    Profesionální editor pro přidávání a úpravu textů písniček přímo do MP3 souborů. 
+                    Podpora ID3v2 tagů, synchronizace textů a export upravených souborů.
+                </p>
+                <div class="project-tags">
+                    <span class="tag">HTML5</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">ID3 Tags</span>
+                    <span class="tag">File API</span>
+                </div>
+                <div class="project-actions">
+                    <button class="launch-btn" onclick="window.open('https://jirka22med.github.io/Editor-textu-mp3/', '_blank')">
+                        🚀 SPUSTIT PROJEKT
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROJEKT: Hudební Žánry -->
+        <div id="music-genres" class="page">
+            <div class="back-nav">
+                <button class="back-btn" onclick="goToHome()">⬅️ ZPĚT NA MŮSTEK</button>
+            </div>
+            <div class="project-detail">
+                <div class="project-header">
+                    <div class="icon">🎸</div>
+                    <h2>HUDEBNÍ ŽÁNRY</h2>
+                </div>
+                <div class="project-image-container">
+                    <img src="https://via.placeholder.com/900x500/0e7490/22d3ee?text=Music+Genres+Database" alt="Hudební Žánry">
+                </div>
+                <p class="project-description">
+                    Komplexní katalog hudebních žánrů s ukázkami, historií a charakteristikami. 
+                    Interaktivní průzkum světa hudby od klasiky po moderní elektroniku.
+                </p>
+                <div class="project-tags">
+                    <span class="tag">Databáze</span>
+                    <span class="tag">Interaktivní</span>
+                    <span class="tag">Audio Samples</span>
+                </div>
+                <div class="project-actions">
+                    <button class="launch-btn" onclick="alert('🚀 Projekt se připravuje k vypuštění!')">
+                        🚀 PŘIPRAVUJE SE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROJEKT: Paleta Barev -->
+        <div id="color-palette" class="page">
+            <div class="back-nav">
+                <button class="back-btn" onclick="goToHome()">⬅️ ZPĚT NA MŮSTEK</button>
+            </div>
+            <div class="project-detail">
+                <div class="project-header">
+                    <div class="icon">🌈</div>
+                    <h2>KOMPLETNÍ PALETA BAREV</h2>
+                </div>
+                <div class="project-image-container">
+                    <img src="https://via.placeholder.com/900x500/9333ea/fbbf24?text=Color+Palette+Tool" alt="Paleta Barev">
+                </div>
+                <p class="project-description">
+                    Profesionální nástroj pro práci s barvami. Hex kódy, RGB, HSL převody, 
+                    generátor palet a export pro CSS/design nástroje.
+                </p>
+                <div class="project-tags">
+                    <span class="tag">CSS</span>
+                    <span class="tag">Design</span>
+                    <span class="tag">Color Theory</span>
+                    <span class="tag">Export</span>
+                </div>
+                <div class="project-actions">
+                    <button class="launch-btn" onclick="alert('🚀 Projekt se připravuje k vypuštění!')">
+                        🚀 PŘIPRAVUJE SE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROJEKT: Foto Editor -->
+        <div id="photo-editor" class="page">
+            <div class="back-nav">
+                <button class="back-btn" onclick="goToHome()">⬅️ ZPĚT NA MŮSTEK</button>
+            </div>
+            <div class="project-detail">
+                <div class="project-header">
+                    <div class="icon">📸</div>
+                    <h2>MODERNÍ FOTO EDITOR</h2>
+                </div>
+                <div class="project-image-container">
+                    <img src="https://via.placeholder.com/900x500/1e3a8a/bae6fd?text=Photo+Editor" alt="Foto Editor">
+                </div>
+                <p class="project-description">
+                    Pokročilý webový editor obrázků s filtry, efekty, rotací, ořezem a dalšími nástroji. 
+                    Vše běží přímo v prohlížeči bez nutnosti instalace.
+                </p>
+                <div class="project-tags">
+                    <span class="tag">Canvas API</span>
+                    <span class="tag">Image Processing</span>
+                    <span class="tag">Filters</span>
+                    <span class="tag">Export</span>
+                </div>
+                <div class="project-actions">
+                    <button class="launch-btn" onclick="alert('🚀 Projekt se připravuje k vypuštění!')">
+                        🚀 PŘIPRAVUJE SE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROJEKT: HTML Editor -->
+        <div id="html-editor" class="page">
+            <div class="back-nav">
+                <button class="back-btn" onclick="goToHome()">⬅️ ZPĚT NA MŮSTEK</button>
+            </div>
+            <div class="project-detail">
+                <div class="project-header">
+                    <div class="icon">📝</div>
+                    <h2>ROZŠÍŘENÝ HTML EDITOR</h2>
+                </div>
+                <div class="project-image-container">
+                    <img src="https://via.placeholder.com/900x500/581c87/22d3ee?text=HTML+Editor" alt="HTML Editor">
+                </div>
+                <p class="project-description">
+                    Pokročilý code editor s live preview, syntax highlighting a exportem. 
+                    Perfektní nástroj pro rychlé prototypování webových projektů.
+                </p>
+                <div class="project-tags">
+                    <span class="tag">Code Editor</span>
+                    <span class="tag">Live Preview</span>
+                    <span class="tag">Syntax Highlight</span>
+                    <span class="tag">Export</span>
+                </div>
+                <div class="project-actions">
+                    <button class="launch-btn" onclick="alert('🚀 Projekt se připravuje k vypuštění!')">
+                        🚀 PŘIPRAVUJE SE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="lcars-footer">
+            <div class="footer-cap-left">WARP 9.99</div>
+            <div class="footer-bar"></div>
+            <div class="footer-cap-right">KONEC TX</div>
+        </div>
+
+        <div class="footer-text">
+            <p style="font-size: 1.2em; color: #fbbf24;">🖖 Live Long and Prosper 🖖</p>
+            <p>Vytvořeno admirálem Claude.AI pro více admirála Jiříka</p>
+            <p style="color: #9333ea; font-size: 0.9em;">Hvězdná flotila - Oddělení pokročilých technologií</p>
+            <p style="color: #3b82f6; font-size: 0.8em; margin-top: 10px;">
+                © 2025 Admirál Jiřík | GitHub: jirka22med
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Načítací obrazovka
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 3000);
+        });
+
+        // Navigace mezi stránkami
+        function goToPage(pageId) {
+            // Skrýt všechny stránky
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // Zobrazit zvolenou stránku
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function goToHome() {
+            goToPage('home');
+        }
+
+        // Parallax efekt pro hvězdy
+        document.addEventListener('mousemove', (e) => {
+            const starfield = document.querySelector('.starfield');
+            const moveX = (e.clientX / window.innerWidth - 0.5) * 20;
+            const moveY = (e.clientY / window.innerHeight - 0.5) * 20;
+            starfield.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        // Animace při scrollování
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.nav-card, .stat-box');
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease-out';
+                observer.observe(card);
+            });
+        });
+
+        // Easter egg - Konami kód
+        let konamiCode = [];
+        const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        
+        document.addEventListener('keydown', (e) => {
+            konamiCode.push(e.key);
+            konamiCode = konamiCode.slice(-10);
+            
+            if (konamiCode.join('') === konamiSequence.join('')) {
+                activateWarpSpeed();
+            }
+        });
+
+        function activateWarpSpeed() {
+            alert('🚀 WARP JÁDRO AKTIVOVÁNO! 🚀\n\nMaximální rychlost dosažena!\nAdmirál Jiřík má ovládnutí flotily!');
+            document.body.style.animation = 'pulse 0.5s ease-in-out 3';
+        }
+
+        // Console Easter Egg
+        console.log('%c🖖 HVĚZDNÁ FLOTILA 🖖', 'color: #22d3ee; font-size: 24px; font-weight: bold;');
+        console.log('%cVítejte na palubě, admirále!', 'color: #fbbf24; font-size: 16px;');
+        console.log('%cTip: Zkuste Konami kód (↑↑↓↓←→←→BA)', 'color: #9333ea; font-size: 12px;');
+        console.log('%cSystém: Multi-page navigace aktivní', 'color: #10b981; font-size: 12px;');
+    </script>
+</body>
+</html>
